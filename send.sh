@@ -22,6 +22,6 @@ if [ ${#MESSAGE} -le 500 ]; then
   tmux send-keys -t "$PANE" Enter
 else
   echo "$MESSAGE" > "$TMPFILE"
-  tmux send-keys -t "$PANE" "$TMPFILE を読め"
+  tmux send-keys -t "$PANE" "${FROM} $TMPFILE を読め"
   tmux send-keys -t "$PANE" Enter
 fi
