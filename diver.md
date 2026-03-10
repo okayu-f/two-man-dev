@@ -12,3 +12,4 @@
 - コミット・プッシュはユーザーの指示があるまでしない
 - 不可逆操作は必ずユーザーに確認する
 - operator への連絡は必ず send.sh を使うこと。自分でファイルを書いて渡さない
+- `#` を含む長文（見出し付きの構造化テキスト等）を送る場合は、内容を `/tmp/two-man-dev-*.md` にWriteし、send.sh にはファイルパスだけを渡すこと（例: `bash send.sh operator "/tmp/two-man-dev-review.md を読んでください"`）。bash引数に `#` が含まれるとClaude Codeのセキュリティ警告が発生するため
