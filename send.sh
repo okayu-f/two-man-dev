@@ -6,9 +6,15 @@
 TARGET="$1"
 MESSAGE="$2"
 
+# 呼び出し元のtmuxセッション名を自動検出
+SESSION="$(tmux display-message -p '#{session_name}' 2>/dev/null)"
+if [ -z "$SESSION" ]; then
+  echo "tmux session not found" >&2; exit 1
+fi
+
 case "$TARGET" in
-  diver)    PANE="two-man-dev:0.0"; FROM="[from: operator]" ;;
-  operator) PANE="two-man-dev:0.1"; FROM="[from: diver]" ;;
+  diver)    PANE="${SESSION}:0.0"; FROM="[from: operator]" ;;
+  operator) PANE="${SESSION}:0.1"; FROM="[from: diver]" ;;
   *) echo "target: diver or operator" >&2; exit 1 ;;
 esac
 
