@@ -1,7 +1,24 @@
 #!/bin/bash
-PROJECT="${1:-.}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SESSION_NAME="two-man-$(basename "$(cd "$PROJECT" && pwd)")"
+
+# オプション解析
+SESSION_NAME=""
+while getopts "n:" opt; do
+  case $opt in
+    n) SESSION_NAME="$OPTARG" ;;
+    *) echo "usage: $0 [-n session_name] [project_dir]" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+PROJECT="${1:-.}"
+
+# セッション名: 指定なしならプロジェクト名から自動生成
+if [ -z "$SESSION_NAME" ]; then
+  SESSION_NAME="two-man-$(basename "$(cd "$PROJECT" && pwd)")"
+else
+  SESSION_NAME="two-man-${SESSION_NAME}"
+fi
 
 ROLE_MSG_DIVER="あなたはdiverです。${SCRIPT_DIR}/diver.md を読んで理解してください。
 operatorに連絡したいときは、${SCRIPT_DIR}/send.sh を利用してもらえば連絡ができるはずです。

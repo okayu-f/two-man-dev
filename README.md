@@ -33,6 +33,7 @@ two-man-devはこの中間にある: **1セッションでは足りないが、�
 - **実装者視点と俯瞰視点の両方が欲しい人。** 実装しているからこそ見えること、外から見ているからこそ見えることがある
 
 逆に、こういう人には向かない:
+
 - ゴールが明確で、すぐAIに指示を出せる → 1セッションで十分
 - AIに完全お任せで並列に回したい → マルチエージェントの方が向いている
 
@@ -57,9 +58,15 @@ chmod +x ~/tools/two-man-dev/start.sh ~/tools/two-man-dev/send.sh
 
 # 省略時はカレントディレクトリ
 ~/tools/two-man-dev/start.sh
+
+# セッション名を指定して起動（同一プロジェクトで複数セッション起動時）
+~/tools/two-man-dev/start.sh -n feature-auth ~/path/to/project
+# → tmuxセッション名: two-man-feature-auth
 ```
 
-起動すると tmux セッション `two-man-dev` が作られ、左ペイン(diver)・右ペイン(operator) にそれぞれ Claude Code が起動する。各エージェントは自動で役割ファイルを読み込む。
+`-n` を省略した場合、セッション名はプロジェクトディレクトリ名から自動生成される（例: `two-man-myproject`）。
+
+起動すると tmux セッションが作られ、左ペイン(diver)・右ペイン(operator) にそれぞれ Claude Code が起動する。各エージェントは自動で役割ファイルを読み込む。
 
 - **左ペイン (0.0)**: diver - 実装担当。コードを書く
 - **右ペイン (0.1)**: operator - 相談役。設計・レビュー・方針提案
