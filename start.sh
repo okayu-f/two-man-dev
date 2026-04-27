@@ -28,10 +28,20 @@ ROLE_MSG_OPERATOR="あなたはoperatorです。${SCRIPT_DIR}/operator.md を読
 diverに連絡したいときは、${SCRIPT_DIR}/send.sh を利用してもらえば連絡ができるはずです。
 依頼はこの後送ります。"
 
-tmux new-session -d -s $SESSION_NAME -x 220 -y 50
-tmux split-window -h -t $SESSION_NAME:0
+# cmux内で起動された場合、CMUX環境変数をtmuxに引き継ぐ
+CMUX_ENV_OPTS=()
+if [ -n "$CMUX_WORKSPACE_ID" ]; then
+  CMUX_ENV_OPTS+=(-e "CMUX_WORKSPACE_ID=$CMUX_WORKSPACE_ID")
+  CMUX_ENV_OPTS+=(-e "CMUX_SURFACE_ID=$CMUX_SURFACE_ID")
+  CMUX_ENV_OPTS+=(-e "CMUX_PANEL_ID=$CMUX_PANEL_ID")
+  CMUX_ENV_OPTS+=(-e "CMUX_SOCKET_PATH=$CMUX_SOCKET_PATH")
+  CMUX_ENV_OPTS+=(-e "CMUX_PORT=$CMUX_PORT")
+fi
 
-tmux send-keys -t $SESSION_NAME:0.0 "cd $PROJECT && claude \"$ROLE_MSG_DIVER\"" Enter
-tmux send-keys -t $SESSION_NAME:0.1 "cd $PROJECT && claude \"$ROLE_MSG_OPERATOR\"" Enter
+tmux new-session -d -s "$SESSION_NAME" -x 220 -y 50 "${CMUX_ENV_OPTS[@]}"
+tmux split-window -h -t "$SESSION_NAME:0"
 
-tmux attach -t $SESSION_NAME
+tmux send-keys -t "$SESSION_NAME:0.0" "cd $PROJECT && claude \"$ROLE_MSG_DIVER\"" Enter
+tmux send-keys -t "$SESSION_NAME:0.1" "cd $PROJECT && claude \"$ROLE_MSG_OPERATOR\"" Enter
+
+tmux attach -t "$SESSION_NAME"
