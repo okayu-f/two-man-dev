@@ -23,11 +23,16 @@ MESSAGE="${FROM} ${MESSAGE}"
 TMPFILE="/tmp/two-man-dev-msg-$$.md"
 mkdir -p /tmp
 
+# tmux send-keys の本文送信→Enter の間に sleep を挟む
+# Codex CLI は長文ペースト処理に時間がかかるため、即Enter送信だと無視される（2026-04-30 検証）
+# Claude Code は0でも動くが、Codex 互換のため0.5sでロバスト化
 if [ ${#MESSAGE} -le 500 ]; then
   tmux send-keys -t "$PANE" "$MESSAGE"
+  sleep 0.5
   tmux send-keys -t "$PANE" Enter
 else
   echo "$MESSAGE" > "$TMPFILE"
   tmux send-keys -t "$PANE" "${FROM} $TMPFILE を読め"
+  sleep 0.5
   tmux send-keys -t "$PANE" Enter
 fi
