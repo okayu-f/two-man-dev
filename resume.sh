@@ -73,8 +73,13 @@ resolve_codex_uuid() {
   # SESSION_NAME 部分一致で要約ファイルを探す
   if [ -d "$SESSIONS_DIR" ]; then
     local found_uuid
-    found_uuid=$(grep -l "codex_operator_uuid" "$SESSIONS_DIR"/*"${SESSION_NAME}"*.md 2>/dev/null | \
-      head -1 | \
+    # SESSION_NAME から issue番号を抽出してファイル名検索
+    local issue_num
+    issue_num=$(echo "$SESSION_NAME" | grep -oE "[0-9]+" | head -1)
+    local search_pattern="${issue_num:-${SESSION_NAME}}"
+
+    found_uuid=$(grep -l "codex_operator_uuid" "$SESSIONS_DIR"/*"${search_pattern}"*.md 2>/dev/null | \
+      sort -r | head -1 | \
       xargs -I{} grep -m1 "^codex_operator_uuid:" {} 2>/dev/null | \
       sed 's/^codex_operator_uuid:\s*//' | tr -d ' ')
     if [ -n "$found_uuid" ]; then

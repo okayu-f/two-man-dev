@@ -38,6 +38,8 @@ if [ -z "$SESSION_NAME" ] || [ -z "$DIVER_NAME" ] || [ -z "$OPERATOR_NAME" ]; th
 fi
 
 # codex resume 用 UUID 解決
+# SESSION_NAME（例: "issue527_アラート整備Stage2"）からIssue番号を抽出し、
+# 要約ファイル名に含まれるかで検索する（ファイル名とセッション名が一致しないため）
 resolve_codex_uuid() {
   local target="$1"
   if [[ "$target" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
@@ -45,9 +47,14 @@ resolve_codex_uuid() {
     return 0
   fi
   if [ -d "$SESSIONS_DIR" ]; then
+    # SESSION_NAME から issue番号を抽出（issue527 → 527、issue1242 → 1242）
+    local issue_num
+    issue_num=$(echo "$SESSION_NAME" | grep -oE '[0-9]+' | head -1)
+    local search_pattern="${issue_num:-${SESSION_NAME}}"
+
     local found_uuid
-    found_uuid=$(grep -l "codex_operator_uuid" "$SESSIONS_DIR"/*"${SESSION_NAME}"*.md 2>/dev/null | \
-      head -1 | \
+    found_uuid=$(grep -l "codex_operator_uuid" "$SESSIONS_DIR"/*"${search_pattern}"*.md 2>/dev/null | \
+      sort -r | head -1 | \
       xargs -I{} grep -m1 "^codex_operator_uuid:" {} 2>/dev/null | \
       sed 's/^codex_operator_uuid:\s*//' | tr -d ' ')
     if [ -n "$found_uuid" ]; then
