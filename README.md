@@ -8,7 +8,7 @@ Claude Codeを「実装担当(diver)」と「相談役(operator)」の2セッシ
 
 diverはコードを書く。operatorは設計方針とレビューを出す。ユーザーは両方と話しながら開発を進める。
 
-仕組みはシンプルで、tmux + 起動スクリプト + 通信スクリプト1本で成立する。
+仕組みはシンプルで、tmux（または cmux）+ 起動スクリプト + 通信スクリプト1本で成立する。
 
 ## 背景: Claude Code 1セッションの限界
 
@@ -40,14 +40,14 @@ two-man-devはこの中間にある: **1セッションでは足りないが、�
 ## 前提
 
 - macOS / Linux
-- tmux
+- tmux または [cmux](https://cmux.dev)（cmux 使用時は tmux 不要）
 - Claude Code (`claude` コマンドが PATH に通っていること)
 
 ## セットアップ
 
 ```bash
 git clone <this-repo> ~/tools/two-man-dev
-chmod +x ~/tools/two-man-dev/start.sh ~/tools/two-man-dev/send.sh
+chmod +x ~/tools/two-man-dev/start.sh ~/tools/two-man-dev/start-cmux.sh ~/tools/two-man-dev/send.sh
 ```
 
 ## 使い方
@@ -72,6 +72,25 @@ chmod +x ~/tools/two-man-dev/start.sh ~/tools/two-man-dev/send.sh
 - **右ペイン (0.1)**: operator - 相談役。設計・レビュー・方針提案
 
 ユーザーは tmux のペイン切り替え (`Ctrl-b` + 矢印キー) で両方と直接会話する。
+
+
+
+### cmux を使う場合
+
+tmux の代わりに cmux を使う場合は、start-cmux.sh / resume-cmux.sh を使う。
+
+```bash
+# cmux ネイティブで起動（tmux 不要）
+~/tools/two-man-dev/start-cmux.sh ~/path/to/project
+
+# セッション名を指定
+~/tools/two-man-dev/start-cmux.sh -n feature-auth ~/path/to/project
+
+# resume
+~/tools/two-man-dev/resume-cmux.sh -n feature-auth -d "feature-auth diver" -o "feature-auth operator" ~/path/to/project
+```
+
+cmux 版では、tmux セッションの代わりに cmux ワークスペース + ペイン分割でセッションを構成する。send.sh は環境を自動検出して cmux / tmux どちらでも動作する。
 
 ### 典型的なフロー
 
@@ -108,10 +127,13 @@ bash /path/to/send.sh diver "既存の foobar メソッドを使う方式に変�
 
 ```
 two-man-dev/
-  start.sh    - tmuxセッション起動 + Claude Code起動 + 役割自動読み込み
-  send.sh     - エージェント間通信（tmux send-keys経由）
-  diver.md    - diver の役割定義
-  operator.md - operator の役割定義
+  start.sh       - tmux版: セッション起動 + Claude Code起動 + 役割自動読み込み
+  start-cmux.sh  - cmux版: 同上（tmux不要）
+  resume.sh      - tmux版: セッション resume
+  resume-cmux.sh - cmux版: 同上（tmux不要）
+  send.sh        - エージェント間通信（tmux/cmux 自動判定）
+  diver.md       - diver の役割定義
+  operator.md    - operator の役割定義
 ```
 
 ## カスタマイズ
