@@ -51,8 +51,19 @@ cmux_send_enter() {
 }
 
 # --- ワークスペース作成 ---
-WORKSPACE_RESULT=$(cmux new-workspace --cwd "$PROJECT" --name "$SESSION_NAME" 2>&1)
+# CMUX_TARGET_WINDOW が設定されていればそのウィンドウに作成（未設定なら呼び出し元ウィンドウ）
+WINDOW_ARGS=()
+if [ -n "${CMUX_TARGET_WINDOW:-}" ]; then
+  WINDOW_ARGS=(--window "$CMUX_TARGET_WINDOW")
+fi
+WORKSPACE_RESULT=$(cmux new-workspace --cwd "$PROJECT" --name "$SESSION_NAME" "${WINDOW_ARGS[@]}" 2>&1)
 WORKSPACE_ID=$(echo "$WORKSPACE_RESULT" | grep -oE 'workspace:[0-9]+')
+
+if [ -z "$WORKSPACE_ID" ] && [ ${#WINDOW_ARGS[@]} -gt 0 ]; then
+  # 指定ウィンドウが存在しない場合のフォールバック
+  WORKSPACE_RESULT=$(cmux new-workspace --cwd "$PROJECT" --name "$SESSION_NAME" 2>&1)
+  WORKSPACE_ID=$(echo "$WORKSPACE_RESULT" | grep -oE 'workspace:[0-9]+')
+fi
 
 if [ -z "$WORKSPACE_ID" ]; then
   echo "Error: Failed to create cmux workspace: $WORKSPACE_RESULT" >&2
