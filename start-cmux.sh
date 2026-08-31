@@ -3,7 +3,8 @@
 # tmux を使わず、cmux の workspace + split で diver/operator を起動する。
 #
 # 使い方:
-#   bash start-cmux.sh [-n session_name] [--operator-codex] [project_dir]
+#   bash start-cmux.sh [-n session_name] [--operator-codex|--all-codex|--diver-codex] [project_dir]
+#   モード: デフォルト=両Claude／--operator-codex=operatorのみCodex／--all-codex=両Codex／--diver-codex=diverのみCodex（operator=Claude）
 #
 # 前提: cmux が起動していること。
 
@@ -12,11 +13,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SESSION_NAME=""
 OPERATOR_CODEX=false
 ALL_CODEX=false
+DIVER_CODEX=false
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --operator-codex) OPERATOR_CODEX=true; shift ;;
     --all-codex) ALL_CODEX=true; OPERATOR_CODEX=true; shift ;;
+    --diver-codex) DIVER_CODEX=true; shift ;;
     *) ARGS+=("$1"); shift ;;
   esac
 done
@@ -25,7 +28,7 @@ set -- "${ARGS[@]}"
 while getopts "n:" opt; do
   case $opt in
     n) SESSION_NAME="$OPTARG" ;;
-    *) echo "usage: $0 [-n session_name] [--operator-codex] [project_dir]" >&2; exit 1 ;;
+    *) echo "usage: $0 [-n session_name] [--operator-codex|--all-codex|--diver-codex] [project_dir]" >&2; exit 1 ;;
   esac
 done
 shift $((OPTIND - 1))
@@ -113,7 +116,7 @@ DIVER_SURFACE=$(echo "$SURFACES" | head -1)
 OPERATOR_SURFACE=$(echo "$SURFACES" | tail -1)
 
 # diver 起動
-if $ALL_CODEX; then
+if $ALL_CODEX || $DIVER_CODEX; then
   cmux_send_enter "$WORKSPACE_ID" "cd \"$PROJECT\" && codex --sandbox danger-full-access" "$DIVER_SURFACE"
 else
   cmux_send_enter "$WORKSPACE_ID" "cd \"$PROJECT\" && claude" "$DIVER_SURFACE"
@@ -130,7 +133,7 @@ fi
 sleep 8
 
 # ロールメッセージ送信
-if $ALL_CODEX; then
+if $ALL_CODEX || $DIVER_CODEX; then
   cmux_send_enter "$WORKSPACE_ID" "$ROLE_MSG_DIVER_CODEX" "$DIVER_SURFACE"
 else
   cmux_send_enter "$WORKSPACE_ID" "$ROLE_MSG_DIVER" "$DIVER_SURFACE"
