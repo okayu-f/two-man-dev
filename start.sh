@@ -48,10 +48,9 @@ diverに連絡したいときは、${SCRIPT_DIR}/send.sh を利用してもら�
 codex には起動時の名前指定機能がないため、後で resume するには UUID が必要です。
 あなた自身のセッションUUIDを以下の手順で取得し、diverに送ってください:
 
-1. ls -t ~/.codex/sessions/\$(date +%Y/%m/%d)/rollout-*.jsonl | head -3 で最新のjsonlを確認
-2. head -1 <該当jsonl> で session_meta を確認し、cwd が現在の作業ディレクトリと一致するものを特定
-3. その jsonl のファイル名から末尾の UUID 部分を抽出 (例: rollout-2026-05-11T13-53-13-019e1561-d3c1-7b31-9b1b-4aea3cdd793b.jsonl の 019e1561-d3c1-7b31-9b1b-4aea3cdd793b)
-4. bash ${SCRIPT_DIR}/send.sh diver \"私のセッションUUIDは <UUID> です。後で resume するときに使ってください。\" でdiverに通知
+1. bash ~/base/scripts/codex-self-uuid.sh を実行し、出力された1行を <UUID> として使う
+2. 失敗したとき（何も出力されない・終了コードが0以外）は、推定で埋めずに <UUID> を「不明」と書く（最新の rollout を探すなどの推定はしない）
+3. bash ${SCRIPT_DIR}/send.sh diver \"私のセッションUUIDは <UUID> です。後で resume するときに使ってください。\" でdiverに通知
 
 依頼はこの後送ります。"
 
